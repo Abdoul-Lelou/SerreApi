@@ -124,7 +124,7 @@ router.get('/getOne/:id', async (req, res) => {
 })
 
 //Methode pour la modification d'un utilisateur
-router.patch('/update/:id', async (req, res) => {
+router.patch('/update/:id', check, async (req, res) => {
   try {
 
     const id = req.params.id;
