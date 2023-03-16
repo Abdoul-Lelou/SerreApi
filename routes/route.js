@@ -3,7 +3,6 @@ const Model = require('../models/user');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const check = require("../middleware/middleware");
-const { $where } = require('../models/user');
 
 const router = express.Router()
 
