@@ -3,6 +3,7 @@ const Model = require('../models/user');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const check = require("../middleware/middleware");
+const { $where } = require('../models/user');
 
 const router = express.Router()
 
@@ -93,7 +94,7 @@ router.post('/post',   async(req, res) => {
 
 })
 
-//Get all Method
+//Methode de recuperation de tous les utilisateurs
 router.get('/getAll',check, async(req, res) => {
   try{        
     const data = await Model.find();
@@ -104,28 +105,43 @@ router.get('/getAll',check, async(req, res) => {
   }
 })
 
-//Get by ID Method
+//Methode de recuperation d'un seul utilisateur
 router.get('/getOne/:id', async(req, res) => {
-   
-    res.json('getById')
+  try{  
+   const data = await Model.findById(req.params.id);
+    res.json(data)
+   }
+    catch(error){
+    res.status(500).json({message: error.message})
+   }
 })
 
-//Update by ID Method
-router.patch('/update/:id', async (req, res) => {
-    try {
-        
-           return res.send("update");
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-})
+//Methode pour la modification d'un utilisateur
+ router.patch('/update/:id', async (req, res) => {
+   try {
 
-//Delete by ID Method
+    const id = req.params.id;
+    const updatedData = req.body;
+    const options = { new: true };
+    const result = await Model.findByIdAndUpdate(id, updatedData, options)
+
+      res.send(result)
+      }
+
+   catch (error) {
+     res.status(400).json({ message: error.message })
+    }
+}) 
+
+//Methode pour modififier un utilisateur
 router.delete('/delete/:id',check, async(req, res) => {
     try {
+
+      const id = req.params.id;
+      const data = await Model.findByIdAndDelete(id)
+      res.send(`Le Document avec le nom ${data.prenom} ${data.nom} a été supprimé..`)
        
-        res.send("delete")
+        res.send(data)
     }
     catch (error) {
         res.status(400).json({ message: error.message })
