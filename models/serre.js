@@ -16,6 +16,11 @@ const dataSchema = new mongoose.Schema({
         type: Number
     },
     
+    LumSerre: {
+        required: false,
+        type: Number
+    },
+    
 })
 
 module.exports = mongoose.model('serre', dataSchema);

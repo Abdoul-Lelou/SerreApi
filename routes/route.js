@@ -2,8 +2,6 @@ const express = require('express');
 const Model = require('../models/user');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-var fs = require('fs');
-var path = require('path');
 const check = require("../middleware/middleware");
 
 const router = express.Router()
@@ -21,8 +19,6 @@ router.post("/login", async (req, res, next) => {
     existingUser = await Model.findOne({ email: email });
     if (!existingUser) {
       return res.status(400).send("email doesn't exist...!");
-    }else if(existingUser.etat == false){
-      return res.status(401).send("user is disabled...!");
     }
     //check if password is correct
     const isPasswordValid = await bcrypt.compare(password, existingUser.password);
@@ -45,7 +41,7 @@ router.post("/login", async (req, res, next) => {
       return next(error);
     }
    
-    res
+   return res
       .status(200)
       .json({
         success: true,
@@ -64,25 +60,48 @@ router.post("/login", async (req, res, next) => {
 router.post('/post',   async(req, res) => {
 
 
-try {
+  const { email, password, prenom, nom} = req.body;
 
-    res.json("post");
-
-} catch(error) {
-    res.status(400).json({message: error.message})
-}
+  const users = [];
+  
+  const newUser = Model({
+      email,
+      password, 
+      prenom, 
+      nom
+  });
+  
+  try {
+  
+      const oldUser = await Model.findOne({ email });
+  
+      if (oldUser) {
+        return res.status(409).send("Email Already Exist. Please Login");
+      }
+  
+      const hash = await bcrypt.hash(newUser.password, 10);
+      newUser.password = hash;
+      users.push(newUser);
+      // res.json(newUser);
+      await newUser.save();
+  
+      res.status(201).json(newUser);
+  
+  } catch(error) {
+      res.status(400).json({message: error.message})
+  }
 
 })
 
 //Get all Method
-router.get('/getAll', async(req, res) => {
-    try{        
-        
-        res.json('get')
-    }
-    catch(error){
-        res.status(500).json({message: error.message})
-    }
+router.get('/getAll',check, async(req, res) => {
+  try{        
+    const data = await Model.find();
+    res.json(data)
+  }
+  catch(error){
+      res.status(500).json({message: error.message})
+  }
 })
 
 //Get by ID Method

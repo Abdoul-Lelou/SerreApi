@@ -1,9 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
-var bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 require('dotenv').config();
 
-var cors = require('cors')
+const cors = require('cors')
 
 const routes = require('./routes/route');
 
@@ -14,6 +14,7 @@ const database = mongoose.connection
 
 const app = express();
 app.use(cors({origin: '*'}));
+
 app.use(function (req, res, next) {
     //Enabling CORS
     res.header("Access-Control-Allow-Origin", "*");
@@ -23,8 +24,6 @@ app.use(function (req, res, next) {
       next();
 });
 app.use(express.json());
-
-
 app.use(bodyParser.json());
 
 app.use('/api', routes)
