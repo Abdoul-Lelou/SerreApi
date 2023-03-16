@@ -94,6 +94,7 @@ router.post('/post',   async(req, res) => {
 })
 
 //Get all Method
+// Utilisation du middleware pour protéger une route avec le fonction check
 router.get('/getAll',check, async(req, res) => {
   try{        
     const data = await Model.find();
