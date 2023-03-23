@@ -143,7 +143,7 @@ router.delete('/delete/:id', check, async (req, res) => {
 
     return res.send(data)
   }
-  catch (error) {
+    catch (error) {
     return res.status(400).json({ message: error.message })
   }
 })
