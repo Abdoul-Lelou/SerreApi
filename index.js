@@ -37,6 +37,6 @@ database.once('connected', () => {
     console.log('Database Connected');
 })
 
-app.listen(3000, () => {
-   console.log(`Server Started at ${3000}`)
+app.listen(3001, () => {
+   console.log(`Server Started at ${3001}`)
 })
