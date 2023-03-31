@@ -129,8 +129,23 @@ router.patch('/update/:id', check, async (req, res) => {
     const id = req.params.id;
     const updatedData = req.body;
     const options = { new: true };
+
     const result = await Model.findByIdAndUpdate(id, updatedData, options)
 
+     // Comparer l'ancien mot de passe avec le mot de passe haché dans la base de données
+     const passwordMatch = await bcrypt.compare(oldPassword, result.password);
+     if (!passwordMatch) {
+       return res.status(400).json({ message: 'Incorrect password' });
+     }
+
+     // Hacher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Mettre à jour le mot de passe de l'utilisateur dans la base de données
+    result.password = hashedPassword;
+    await result.save();
+
+    return res.status(200).json({ message: 'Mot de passe mis à jour avec succès' });
     return res.send(result)
   }
 
