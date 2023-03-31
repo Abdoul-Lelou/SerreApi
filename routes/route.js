@@ -20,7 +20,7 @@ router.post("/login", async (req, res, next) => { // Async pour dire que la conn
     existingUser = await Model.findOne({ email: email }); 
     if (!existingUser) 
     { // si l'email ne s'y trouve pas donne le message
-      return res.status(400).send("email doesn't exist...!");
+      return res.status(404).send("email doesn't exist...!");
     }
 
     // On sort de if donc ça suppose que l'email existe
@@ -28,7 +28,7 @@ router.post("/login", async (req, res, next) => { // Async pour dire que la conn
 // Comparaison entre le mot de passe saisi et celui se trouvant dans la base de données
     const isPasswordValid = await bcrypt.compare(password, existingUser.password);
     if (!isPasswordValid) { // Le mot de passe n'est pas le bon
-      return res.status(400).send("password is invalid");
+      return res.status(401).send("password is invalid");
     }
 
     // Maintenant que tout est bon (email et mot de passe correctes), on genere un token
@@ -83,7 +83,7 @@ router.post('/post', async (req, res) => {
     const oldUser = await Model.findOne({ email });
 
     if (oldUser) {
-      return res.status(409).send("Email Already Exist. Please Login");
+      return res.status(401).send("Email Already Exist. Please Login");
     }
 
     const hash = await bcrypt.hash(newUser.password, 10);
@@ -95,7 +95,7 @@ router.post('/post', async (req, res) => {
     res.status(201).json(newUser);
 
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(404).json({ message: error.message })
   }
 
 })
@@ -135,7 +135,7 @@ router.patch('/update/:id', check, async (req, res) => {
      // Comparer l'ancien mot de passe avec le mot de passe haché dans la base de données
      const passwordMatch = await bcrypt.compare(oldPassword, result.password);
      if (!passwordMatch) {
-       return res.status(400).json({ message: 'Incorrect password' });
+       return res.status(401).json({ message: 'Incorrect password' });
      }
 
      // Hacher le nouveau mot de passe
@@ -150,7 +150,7 @@ router.patch('/update/:id', check, async (req, res) => {
   }
 
   catch (error) {
-    return res.status(400).json({ message: error.message })
+    return res.status(500).json({ message: error.message })
   }
 })
 
@@ -165,6 +165,6 @@ router.delete('/delete/:id', check, async (req, res) => {
     return res.send(data)
   }
   catch (error) {
-    return res.status(400).json({ message: error.message })
+    return res.status(500).json({ message: error.message })
   }
 })
