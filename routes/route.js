@@ -123,7 +123,9 @@ router.get('/getOne/:id', async (req, res) => {
 })
 
 //Methode pour la modification d'un utilisateur
-router.patch('/update/:id', check, async (req, res) => {
+router.patch('/update/:id',  async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
   try {
 
     const id = req.params.id;
@@ -135,7 +137,7 @@ router.patch('/update/:id', check, async (req, res) => {
      // Comparer l'ancien mot de passe avec le mot de passe haché dans la base de données
      const passwordMatch = await bcrypt.compare(oldPassword, result.password);
      if (!passwordMatch) {
-       return res.status(401).json({ message: 'Incorrect password' });
+       return res.status(400).json({ message: 'Incorrect password' });
      }
 
      // Hacher le nouveau mot de passe
@@ -146,9 +148,8 @@ router.patch('/update/:id', check, async (req, res) => {
     await result.save();
 
     return res.status(200).json({ message: 'Mot de passe mis à jour avec succès' });
-    return res.send(result)
+  
   }
-
   catch (error) {
     return res.status(500).json({ message: error.message })
   }

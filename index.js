@@ -40,3 +40,21 @@ database.once('connected', () => {
 app.listen(3000, () => {
    console.log(`Server Started at ${3000}`)
 })
+
+
+// var Serialport = require('serialport');
+// //  const { set, ref } = require('firebase/database');
+// //  const { databaserRealtime } = require('./firestoreConfig');
+//  var Readline = Serialport.parsers.Readline;
+ 
+//  console.log(Readline);
+ 
+//  var port = new Serialport('/dev/ttyUSB0', {
+//      baudRate: 9600
+//  });
+ 
+//  var parser = port.pipe(new Readline({ delimiter: '\r\n' }));
+ 
+//  parser.on('readable', function() {
+//      console.log('Connexion ouverte');
+//  });
