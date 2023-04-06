@@ -2,24 +2,29 @@ const mongoose = require('mongoose');
 
 
 const dataSchema = new mongoose.Schema({
-    tempSerre: {
+    temp: {
         required: false,
         type: Number
     },
-    humSerre: {
+    hum: {
         required: false,
         type: Number
     },
    
-    humSol: {
+    sol: {
         required: false,
         type: Number
     },
     
-    LumSerre: {
+    lum: {
         required: false,
         type: Number
     },
+    dateInsertion:{
+        required: false,
+        type: Date
+    }
+
     
 })
 

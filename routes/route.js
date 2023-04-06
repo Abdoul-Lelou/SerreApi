@@ -1,5 +1,6 @@
 const express = require('express');
 const Model = require('../models/user');
+const Serre = require('../models/serre');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const check = require("../middleware/middleware");
@@ -101,7 +102,7 @@ router.post('/post', async (req, res) => {
 })
 
 //Methode de recuperation de tous les utilisateurs
-router.get('/getAll', check, async (req, res) => {
+router.get('/getAll',check, async (req, res) => {
   try {
     const data = await Model.find();
     res.json(data)
@@ -164,6 +165,67 @@ router.delete('/delete/:id', check, async (req, res) => {
     res.send(`Le Document avec le nom ${data.prenom} ${data.nom} a été supprimé..`)
 
     return res.send(data)
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+})
+
+
+
+
+//////ROUTE POUR LA SERRE/////
+
+
+router.get('/serre', async (req, res) => {
+try {
+  // const data = await Serre.serre.find();
+  const collection = Serre.collection('serre');
+
+  collection.find().toArray(function(err, docs) {
+    if (err) throw err;
+    console.log("Found the following documents:");
+    console.log(docs);
+  });
+  return res.json(data)
+}
+catch (error) {
+  res.status(500).json({ message: error.message })
+}
+})
+
+
+router.get('/serre/:id', async (req, res) => {
+  try {
+    const data = await Serre.findById(req.params.id);
+    return res.json(data)
+  }
+  catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+})
+
+//Methode pour la modification d'un utilisateur
+router.patch('/serreUpdate/:id',  async (req, res) => {
+  const { matin, soir } = req.body;
+
+  try {
+
+    const id = req.params.id;
+    const updatedData = req.body;
+    const options = { new: true };
+
+    const result = await Model.findByIdAndUpdate(id, updatedData, options)
+
+     // Comparer l'ancien mot de passe avec le mot de passe haché dans la base de données
+    //  const passwordMatch = await bcrypt.compare(oldPassword, result.password);
+     if (!result) {
+       return res.status(404).json({ message: 'Not found' });
+     }
+    await result.save();
+
+    return res.status(200).json({ message: 'Insertion reussie' });
+  
   }
   catch (error) {
     return res.status(500).json({ message: error.message })

@@ -1,31 +1,46 @@
-const app = require('express')();
-const cors = require('cors');
-const mongoose = require('mongoose');
+const express = require('express');
+
 const bodyParser = require('body-parser');
 require('dotenv').config();
 const jwt = require("jsonwebtoken")
+const mongoose = require('mongoose');
+
+
+const cors = require('cors')
 
 const routes = require('./routes/route');
+const serreRoute = require('./routes/serreRouter')
+const arrosageRoute = require('./routes/arrosageRouter')
 
-// const databaseLink = process.env.DATABASE_URL
-// process.setMaxListeners(20);
-// mongoose.connect(databaseLink);
-// const database = mongoose.connection
+
+const databaseLink = process.env.DATABASE_URL
+
+mongoose.connect(databaseLink);
+const database = mongoose.connection
+
+const app = express();
+
 app.use(cors({origin: '*'}));
-// app.use(app.json());
+
+
+app.use(express.json());
 app.use(bodyParser.json());
 
 app.use('/api', routes)
+app.use('/', serreRoute)
+app.use('/', arrosageRoute)
 
 
-// database.on('error', (error) => {
-//    console.log(error)
-// })
 
-// database.once('connected', () => {
-//     console.log('Database Connected');
-// })
+database.on('error', (error) => {
+   console.log(error)
+})
 
+database.once('connected', () => {
+    console.log('Database Connected');
+})
+
+module.exports = database;
 
 
 const http = require('http').createServer(app);
@@ -35,55 +50,107 @@ const io = require('socket.io')(http, {
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('<h1>Hey Socket.io</h1>');
-});
-
-
-
-io.on('connection', (socket) => {
-  
-  console.log('a user connected');
-  
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
-  
-  socket.on('my message', (msg) => {
-    console.log('message: ' + msg);
-  });
-
-  // socket.on('my message', (msg) => {
-  //   io.emit('my broadcast', `server: ${msg}`);
-  // });
-});
-
-
 const SerialPort = require('serialport');
+const { ReadlineParser } = require('@serialport/parser-readline');
+const serre = require('./models/serre');
+const serreRouter = require('./routes/serreRouter');
 const port = new SerialPort('/dev/ttyUSB0', { baudRate: 9600 });
 
-port.on('data', data => {
+const parser= port.pipe(new ReadlineParser({ delimiter: '\r\n' }))
 
-  let status = ""+data;
-  console.log(status == "1");
+ 
 
-  
-  if (status == "1") {
-    token = jwt.sign(
-      { userId: 'admin@gmail.com' }, // id et email de la personne connectée
-        process.env.JWT_SECRET, // cette clé secrète se trouve dans le fichier .env
-      { expiresIn: "1h" } // delai d'expiration du token
-    )
-    console.log(token);
-    io.emit('my broadcast', `${token}`);
-  }else{
-    io.emit('my broadcast', "refuse");
+
+
+port.on('open', () => {
+  io.on('connection', (socket) => {
+    
+    socket.on('isOn', (msg) => {
+      console.log('lampe: ' + msg);
+      port.write("1")
+    });
+
+    socket.on('isOff', (msg) => {
+      console.log('lampe: ' + msg);
+      port.write("0")
+    });
+  });
+});
+
+parser.on('data', (data) => {
+
+  console.log("attente");
+  let dataStr = data.toString();
+ 
+  try {
+    let jsonData = JSON.parse(dataStr)
+
+    // If parsing succeeds, process the JSON data
+    console.log('Received JSON:', jsonData);
+
+    if(jsonData){
+
+      io.emit('temp', `${jsonData.temp}`);
+      io.emit('hum', `${jsonData.hum}`);
+      io.emit('lum', `${jsonData.lum}`);
+      io.emit('sol', `${jsonData.sol}`);
+
+    
+      let tempEtHum = { 
+        'temp': jsonData.temp, 
+        'hum': jsonData.hum, 
+        'dateInsertion': new Date(), 
+        'lum': jsonData.lum,
+        'sol': jsonData.sol,
+      };
+      //Connexion a mongodb et insertion Temperature et humidite
+      //  serre.save(tempEtHum)
+
+      var datHeure = new Date();
+      var min = datHeure.getMinutes();
+      var heur = datHeure.getHours(); //heure
+      var sec = datHeure.getSeconds();
+        
+      if((heur == 08 && min == 00 && sec == 00) || (heur == 19 && min == 00 && sec == 00)){
+        
+        setTimeout(()=>{
+          const collection = database.collection('serres');
+      
+          collection.insertOne(tempEtHum, function(err, res) {
+            if (err) throw err;
+            console.log("Data inserted successfully!");
+          });
+        }, 1000);
+      }
+        // console.log(serre.find())
+
+
+      if( jsonData.rfid == true){
+        token = jwt.sign(
+              { userId: 'admin@gmail.com' }, // id et email de la personne connectée
+                process.env.JWT_SECRET, // cette clé secrète se trouve dans le fichier .env
+              { expiresIn: "1h" } // delai d'expiration du token
+            )
+            console.log(token);
+            io.emit('my broadcast', `${token}`);
+      }else{
+        io.emit('my broadcast', "refuse");
+      }
+
+    }
+
+  } catch (e) {
+    // If parsing fails, do nothing and wait for more data to arrive
   }
 
-  
-  
+
 });
 
-http.listen(3000, () => {
-  console.log('listening on :3000');
-});
+
+
+
+
+ http.listen(3000, () => {
+   console.log('listening on :3000');
+ });
+
