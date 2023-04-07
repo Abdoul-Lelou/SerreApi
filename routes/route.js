@@ -138,7 +138,7 @@ router.patch('/update/:id',  async (req, res) => {
      // Comparer l'ancien mot de passe avec le mot de passe haché dans la base de données
      const passwordMatch = await bcrypt.compare(oldPassword, result.password);
      if (!passwordMatch) {
-       return res.status(400).json({ message: 'Incorrect password' });
+       return res.status(401).json({ message: 'Incorrect password' });
      }
 
      // Hacher le nouveau mot de passe

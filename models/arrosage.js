@@ -8,6 +8,14 @@ const dataSchema = new mongoose.Schema({
     soir: {
         required: false,
         type: String
+    },
+    dureSoir: {
+        required: false,
+        type: String
+    },
+    dureMatin: {
+        required: false,
+        type: String
     }
 
     

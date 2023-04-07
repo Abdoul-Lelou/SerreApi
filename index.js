@@ -55,7 +55,7 @@ const { ReadlineParser } = require('@serialport/parser-readline');
 const serre = require('./models/serre');
 const serreRouter = require('./routes/serreRouter');
 const port = new SerialPort('/dev/ttyUSB0', { baudRate: 9600 });
-
+// const port2 = new SerialPort('/dev/ttyUSB0', { baudRate: 115200 });
 const parser= port.pipe(new ReadlineParser({ delimiter: '\r\n' }))
 
  
@@ -74,14 +74,62 @@ port.on('open', () => {
       console.log('lampe: ' + msg);
       port.write("0")
     });
+
+    socket.on('isWater', (msg) => {
+      console.log('water: ' + msg);
+      port.write("2")
+    });
+
+    socket.on('noWater', (msg) => {
+      console.log('water: ' + msg);
+      port.write("3")
+    });
+
+    socket.on('noFan', (msg) => {
+      console.log('fan: ' + msg);
+      port.write("4")
+    });
+
+    socket.on('isFan', (msg) => {
+      console.log('fan: ' + msg);
+      port.write("5")
+    });
+
+    socket.on('openDoor', (msg) => {
+      console.log('door: ' + msg);
+      port.write("6")
+    });
+
+    socket.on('closeDoor', (msg) => {
+      console.log('door: ' + msg);
+      port.write("7")
+    });
   });
 });
+
+
+// port2.on('open', () => {
+//   io.on('connection', (socket) => {
+    
+
+//     socket.on('isWater', (msg) => {
+//       console.log('water: ' + msg);
+//       port.write("1")
+//     });
+
+//     socket.on('noWater', (msg) => {
+//       console.log('water: ' + msg);
+//       port.write("0")
+//     });
+//   });
+// });
 
 parser.on('data', (data) => {
 
   console.log("attente");
   let dataStr = data.toString();
- 
+  let matin ="", soir= "", dureMatin="", dureSoir="";
+
   try {
     let jsonData = JSON.parse(dataStr)
 
@@ -94,7 +142,9 @@ parser.on('data', (data) => {
       io.emit('hum', `${jsonData.hum}`);
       io.emit('lum', `${jsonData.lum}`);
       io.emit('sol', `${jsonData.sol}`);
-
+      io.emit('buzzer', `${jsonData.buzzer}`);
+      io.emit('toit', `${jsonData.toit}`);
+      io.emit('door', `${jsonData.door}`);
     
       let tempEtHum = { 
         'temp': jsonData.temp, 
@@ -110,6 +160,54 @@ parser.on('data', (data) => {
       var min = datHeure.getMinutes();
       var heur = datHeure.getHours(); //heure
       var sec = datHeure.getSeconds();
+
+      const arrosageCollection = database.collection('arrosages');
+
+     // const collection = client.db('<database>').collection('<collection>');
+
+     arrosageCollection.findOne({ matin: '7' }, function(err, result) {
+    if(err) {
+      console.log('Error finding document:', err);
+      return;
+    }
+    matin = result.matin;
+    soir = result.soir;
+    dureMatin = result.dureMatin
+    dureSoir = result.dureSoir
+
+    console.log('Found document:',dureSoir);
+    // arrosageCollection.close();
+console.log(min);
+    if((heur == matin  && min == 24 && sec == 00)){
+      port.write("2")
+      console.log("allumer");
+      setTimeout(() => {
+        port.write("3")
+        console.log("eteindre");
+      }, dureMatin);
+
+    }else if((heur == soir  && min == 24 && sec == 00)){
+      console.log("allumer");
+      port.write("2")
+      setTimeout(() => {
+        port.write("3")
+        console.log("eteindre");
+      }, dureSoir);
+    }
+  });
+
+  // console.log(dureSoir);
+
+      // console.log( arrosageCollection.find({},function(err, result){
+      //   if(err) throw err
+      //   return result
+      // }));
+      // arrosageCollection.find()
+      // collection.find().map(e=> console.log(e))
+      // (tempEtHum, function(err, res) {
+      //   if (err) throw err;
+      //   console.log("Data inserted successfully!");
+      // });
         
       if((heur == 08 && min == 00 && sec == 00) || (heur == 19 && min == 00 && sec == 00)){
         
@@ -122,6 +220,9 @@ parser.on('data', (data) => {
           });
         }, 1000);
       }
+      // else if(){
+          
+      // }
         // console.log(serre.find())
 
 
