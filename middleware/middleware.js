@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
  /* /importer jsonwebtoken/ */
 require('dotenv').config();
 
-/* /next()nous permet si utilisateur est authentifée pour executer / */
+/* /next()nous permet si utilisateur est authentifée pour executer awa  / */
 // Middleware pour vérifier si l'utilisateur est authentifié
 let verifyToken = (req, res, next) => {
    /*  /recupration de header et diviser autour de espace / */
