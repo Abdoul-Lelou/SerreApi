@@ -18,7 +18,7 @@ router.post("/login", async (req, res, next) => { // Async pour dire que la conn
     let existingUser;
 
 // Retrouve l'email saisi dans la base de données et stocke ça dans existingUser
-    existingUser = await Model.findOne({ email: email }); 
+    existingUser = await Model.findOne({ email: email }).error(); 
     if (!existingUser) 
     { // si l'email ne s'y trouve pas donne le message
       return res.status(404).send("email doesn't exist...!");
@@ -38,7 +38,7 @@ router.post("/login", async (req, res, next) => { // Async pour dire que la conn
     try {  // Essaye de faire ceci ...
       //Creating jwt token
       token = jwt.sign(
-        { userId: existingUser.id, email: existingUser.email }, // id et email de la personne connectée
+        { userId: existingUser, email: existingUser.email }, // id et email de la personne connectée
           process.env.JWT_SECRET, // cette clé secrète se trouve dans le fichier .env
         { expiresIn: "1h" } // delai d'expiration du token
       );
