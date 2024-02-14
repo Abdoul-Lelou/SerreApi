@@ -16,9 +16,11 @@ router.post("/login", async (req, res, next) => { // Async pour dire que la conn
     let { email, password } = req.body; 
 
     let existingUser;
-
-// Retrouve l'email saisi dans la base de données et stocke ça dans existingUser
-    existingUser = await Model.findOne({ email: email }).error(); 
+    // Retrouve l'email saisi dans la base de données et stocke ça dans existingUser
+    existingUser = await Model.findOne({ email: email }); 
+    console.log('====================================');
+    console.log(existingUser);
+    console.log('====================================');
     if (!existingUser) 
     { // si l'email ne s'y trouve pas donne le message
       return res.status(404).send("email doesn't exist...!");
@@ -102,7 +104,7 @@ router.post('/post', async (req, res) => {
 })
 
 //Methode de recuperation de tous les utilisateurs
-router.get('/getAll',check, async (req, res) => {
+router.get('/getAll', async (req, res) => {
   try {
     const data = await Model.find();
     res.json(data)
