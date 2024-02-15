@@ -11,16 +11,14 @@ module.exports = router;
 
 
 // La connexion par formulaire
-router.post("/login", async (req, res, next) => { // Async pour dire que la connexion ne dépend d'aucun processus 
+// Async pour dire que la connexion ne dépend d'aucun processus 
+router.post("/login", async (req, res, next) => { 
     // On Récupère l'email et le mot de passe contenus dans la requete
     let { email, password } = req.body; 
 
     let existingUser;
     // Retrouve l'email saisi dans la base de données et stocke ça dans existingUser
     existingUser = await Model.findOne({ email: email }); 
-    console.log('====================================');
-    console.log(existingUser);
-    console.log('====================================');
     if (!existingUser) 
     { // si l'email ne s'y trouve pas donne le message
       return res.status(404).send("email doesn't exist...!");
