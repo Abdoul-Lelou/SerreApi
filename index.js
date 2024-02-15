@@ -21,8 +21,8 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 app.use('/api', routes)
-app.use('/', serreRoute)
-app.use('/', arrosageRoute)
+app.use('/api', serreRoute)
+app.use('/api', arrosageRoute)
 
 
 

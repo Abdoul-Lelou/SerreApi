@@ -9,31 +9,31 @@ module.exports = arrosageRouter;
 //////ROUTE POUR LA SERRE/////
 
 
-// arrosageRouter.post('/postArrosage', async (req, res) => {
+arrosageRouter.post('/postArrosage', async (req, res) => {
 
 
-//   const {matin,soir,dureMatin,dureSoir} = req.body;
+  const {matin,soir,dureMatin,dureSoir} = req.body;
 
-//   const users = [];
+  const users = [];
 
-//   let dateInsertion = new Date();
-//   const arrosageData = Arrosage({
-//     matin,
-//     soir,
-//     dureMatin,
-//     dureSoir
-//   });
+  let dateInsertion = new Date();
+  const arrosageData = Arrosage({
+    matin,
+    soir,
+    dureMatin,
+    dureSoir
+  });
 
-//   try {
+  try {
 
-//     await arrosageData.save();
-//     return res.status(201).json(arrosageData);
+    await arrosageData.save();
+    return res.status(201).json(arrosageData);
 
-//   } catch (error) {
-//     res.status(404).json({ message: error.message })
-//   }
+  } catch (error) {
+    res.status(404).json({ message: error.message })
+  }
 
-// })
+})
 
 
 
